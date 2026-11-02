@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { TIPOS_DENUNCIA } from '@/models/catalogo'
 import type { Ocorrencia } from '@/models/ocorrencia'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
+import { paraAnexo } from '@/utils/anexo'
 
 export function NovaDenunciaPage() {
   const { usuario } = useAuth()
@@ -52,7 +53,7 @@ export function NovaDenunciaPage() {
             descricao: descricao.trim(),
             local: 'Não informado',
             anonima,
-            anexos: evidencias.map((f) => f.name),
+            anexos: evidencias.map(paraAnexo),
           },
           usuario,
         ),

@@ -31,7 +31,7 @@ export function decodeJwt(token: string): JwtClaims | null {
     if (partes.length !== 3) return null
     const claims = JSON.parse(base64UrlDecode(partes[1])) as Partial<JwtClaims>
     if (!claims.sub || !claims.name || !claims.email || !claims.exp) return null
-    if (claims.role !== 'admin' && claims.role !== 'usuario') return null
+    if (claims.role !== 'admin' && claims.role !== 'seguranca' && claims.role !== 'usuario') return null
     return claims as JwtClaims
   } catch {
     return null

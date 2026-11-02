@@ -6,7 +6,9 @@ export const SENHA_MOCK = '123456'
 
 export const usuariosMock: Usuario[] = [
   { id: 'u1', nome: 'Eduardo Costa', email: 'eduardo.costa@unifor.br', perfil: 'usuario' },
-  { id: 'u2', nome: 'Admin Segurança', email: 'admin@unifor.br', perfil: 'admin' },
+  { id: 'u2', nome: 'Administrador', email: 'admin@unifor.br', perfil: 'admin' },
+  { id: 'u3', nome: 'Equipe Segurança', email: 'seguranca@unifor.br', perfil: 'seguranca' },
+  { id: 'u4', nome: 'Carlos Mendes', email: 'carlos.mendes@unifor.br', perfil: 'seguranca' },
 ]
 
 export const segurancasMock: Seguranca[] = [
@@ -45,6 +47,7 @@ export const ocorrenciasMock: Ocorrencia[] = [
     local: 'Bloco D, Sala D3',
     tipo: 'manutencao',
     status: 'em_andamento',
+    responsavelId: 'u3',
     solicitante: 'Eduardo Costa',
     autorId: 'u1',
     criadoEm: new Date().toISOString(),

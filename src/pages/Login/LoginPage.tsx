@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Lock, Mail, ShieldCheck } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useAuth } from '@/hooks/useAuth'
@@ -34,10 +34,7 @@ export function LoginPage() {
     <div className="grid min-h-screen place-items-center bg-gradient-to-b from-brand-50 to-surface px-4 py-8">
       <div className="w-full max-w-md rounded-3xl border border-line bg-white p-6 shadow-sm sm:p-8">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-3 grid size-16 place-items-center rounded-2xl bg-brand-900 text-white">
-            <ShieldCheck size={32} />
-          </div>
-          <span className="text-xs font-bold tracking-widest text-brand-500">UNIFOR</span>
+          <img src="/unifor-logo-vertical.svg" alt="UNIFOR" className="mb-4 h-20" />
           <h1 className="mt-1 text-2xl font-bold text-brand-900">Central de Reportes</h1>
           <p className="mt-1 text-sm text-muted">Gestão de ocorrências e segurança no campus</p>
         </div>

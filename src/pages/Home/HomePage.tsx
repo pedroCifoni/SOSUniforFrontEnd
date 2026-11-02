@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ClipboardList, LayoutDashboard, ShieldAlert, Wrench } from 'lucide-react'
+import { OcorrenciaModal } from '@/components/ocorrencias/OcorrenciaModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuth } from '@/hooks/useAuth'
 import { useHoldPress } from '@/hooks/useHoldPress'
-import type { Ocorrencia } from '@/models/ocorrencia'
+import { ENCAMINHAR_LABEL, type Ocorrencia } from '@/models/ocorrencia'
+import type { Usuario } from '@/models/usuario'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
+import { usuarioService } from '@/services/usuarioService'
 
 const atalhos = [
   { to: '/novo-chamado', label: 'Manutenção', icon: Wrench },
@@ -16,16 +19,36 @@ const atalhos = [
 export function HomePage() {
   const { usuario } = useAuth()
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([])
+  const [selecionada, setSelecionada] = useState<Ocorrencia | null>(null)
+  const [segurancas, setSegurancas] = useState<Usuario[]>([])
   const navigate = useNavigate()
 
+  const atendimento = usuario?.perfil === 'admin'
+
+  // Admin vê a mesma fila do painel (pendentes de todos); usuário vê só as próprias.
   const carregar = useCallback(async () => {
-    if (usuario) setOcorrencias(await ocorrenciaService.listarPorAutor(usuario.id))
-  }, [usuario])
+    if (!usuario) return
+    setOcorrencias(
+      atendimento ? await ocorrenciaService.listar() : await ocorrenciaService.listarPorAutor(usuario.id),
+    )
+  }, [usuario, atendimento])
+
+  async function encaminhar(id: string, destinoId?: string) {
+    if (!destinoId) return
+    await ocorrenciaService.encaminhar(id, destinoId)
+    setSelecionada(null)
+    void carregar()
+  }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void carregar()
   }, [carregar])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (atendimento) void usuarioService.listarSegurancas().then(setSegurancas)
+  }, [atendimento])
 
   const acionarSos = useCallback(async () => {
     if (!usuario) return
@@ -38,7 +61,9 @@ export function HomePage() {
 
   const { progresso, iniciar, cancelar } = useHoldPress(acionarSos, 2000)
 
-  const minhas = ocorrencias.filter((o) => o.tipo !== 'sos').slice(0, 3)
+  const minhas = atendimento
+    ? ocorrencias.filter((o) => o.status === 'pendente').sort((a, b) => Number(b.tipo === 'sos') - Number(a.tipo === 'sos'))
+    : ocorrencias.filter((o) => o.tipo !== 'sos').slice(0, 3)
 
   return (
     <div className="space-y-6">
@@ -94,26 +119,51 @@ export function HomePage() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-bold text-brand-900">Últimas Ocorrências</h3>
-          <Link to="/minhas-ocorrencias" className="text-xs font-semibold text-brand-500">
-            Ver todas
-          </Link>
+          {!atendimento && (
+            <Link to="/minhas-ocorrencias" className="text-xs font-semibold text-brand-500">
+              Ver todas
+            </Link>
+          )}
         </div>
         <ul className="space-y-3">
           {minhas.map((o) => (
-            <li key={o.id} className="rounded-2xl border border-line bg-white p-4 shadow-sm">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="text-[11px] text-muted">{o.protocolo}</p>
-                  <p className="truncate text-sm font-semibold text-brand-900">{o.titulo}</p>
-                  <p className="truncate text-xs text-muted">{o.local}</p>
+            <li key={o.id}>
+              <button
+                onClick={() => setSelecionada(o)}
+                aria-haspopup="dialog"
+                className="w-full rounded-2xl border border-line bg-white p-4 text-left shadow-sm transition hover:border-brand-500"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-[11px] text-muted">{o.protocolo}</p>
+                    <p className="truncate text-sm font-semibold text-brand-900">{o.titulo}</p>
+                    <p className="truncate text-xs text-muted">{o.local}</p>
+                  </div>
+                  <StatusBadge status={o.status} />
                 </div>
-                <StatusBadge status={o.status} />
-              </div>
+              </button>
             </li>
           ))}
-          {minhas.length === 0 && <li className="text-sm text-muted">Nenhuma ocorrência ainda.</li>}
+          {minhas.length === 0 && (
+            <li className="text-sm text-muted">
+              {atendimento ? 'Fila vazia. Nenhuma ocorrência pendente.' : 'Nenhuma ocorrência ainda.'}
+            </li>
+          )}
         </ul>
       </section>
+
+      {selecionada && (
+        <OcorrenciaModal
+          ocorrencia={selecionada}
+          onClose={() => setSelecionada(null)}
+          destinos={atendimento && selecionada.status === 'pendente' ? segurancas : undefined}
+          acao={
+            atendimento && selecionada.status === 'pendente'
+              ? { label: ENCAMINHAR_LABEL[selecionada.tipo], onClick: (destinoId) => void encaminhar(selecionada.id, destinoId) }
+              : undefined
+          }
+        />
+      )}
     </div>
   )
 }

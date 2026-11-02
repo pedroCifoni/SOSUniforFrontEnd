@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
-import { TIPO_LABEL, type Ocorrencia } from '@/models/ocorrencia'
+import { OcorrenciaModal } from '@/components/ocorrencias/OcorrenciaModal'
+import { ENCAMINHAR_LABEL, TIPO_LABEL, type Ocorrencia } from '@/models/ocorrencia'
+import type { Usuario } from '@/models/usuario'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
+import { usuarioService } from '@/services/usuarioService'
 import { tempoRelativo } from '@/utils/format'
 
 export function PainelAdminPage() {
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([])
+  const [selecionada, setSelecionada] = useState<Ocorrencia | null>(null)
+  const [segurancas, setSegurancas] = useState<Usuario[]>([])
 
   const carregar = useCallback(async () => {
     setOcorrencias(await ocorrenciaService.listar())
@@ -13,10 +18,13 @@ export function PainelAdminPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void carregar()
+    void usuarioService.listarSegurancas().then(setSegurancas)
   }, [carregar])
 
-  async function encaminhar(id: string) {
-    await ocorrenciaService.atualizarStatus(id, 'em_andamento')
+  async function encaminhar(id: string, destinoId?: string) {
+    if (!destinoId) return
+    await ocorrenciaService.encaminhar(id, destinoId)
+    setSelecionada(null)
     void carregar()
   }
 
@@ -53,6 +61,11 @@ export function PainelAdminPage() {
                 key={o.id}
                 className={`rounded-2xl border bg-white p-4 shadow-sm ${sos ? 'border-sos-500' : 'border-line'}`}
               >
+                <button
+                  onClick={() => setSelecionada(o)}
+                  aria-haspopup="dialog"
+                  className="mb-3 block w-full text-left"
+                >
                 <div className="mb-2 flex items-center justify-between">
                   <span
                     className={`rounded px-2 py-0.5 text-[10px] font-bold ${
@@ -66,18 +79,19 @@ export function PainelAdminPage() {
                   </span>
                 </div>
                 <p className="text-sm font-semibold text-brand-900">{o.titulo}</p>
-                <p className="mb-3 text-xs text-muted">
+                <p className="text-xs text-muted">
                   {o.solicitante} · {o.local}
                 </p>
+                </button>
                 <button
-                  onClick={() => encaminhar(o.id)}
+                  onClick={() => setSelecionada(o)}
                   className={`h-10 w-full rounded-xl text-xs font-semibold transition ${
                     sos
                       ? 'bg-brand-900 text-white hover:bg-brand-700'
                       : 'bg-brand-50 text-brand-500 hover:bg-brand-100'
                   }`}
                 >
-                  {sos ? 'Encaminhar Patrulha' : o.tipo === 'manutencao' ? 'Encaminhar Técnico' : 'Analisar'}
+                  {ENCAMINHAR_LABEL[o.tipo]}
                 </button>
               </li>
             )
@@ -85,6 +99,19 @@ export function PainelAdminPage() {
           {fila.length === 0 && <li className="text-sm text-muted">Fila vazia. Nenhuma ocorrência pendente.</li>}
         </ul>
       </section>
+
+      {selecionada && (
+        <OcorrenciaModal
+          ocorrencia={selecionada}
+          onClose={() => setSelecionada(null)}
+          destinos={selecionada.status === 'pendente' ? segurancas : undefined}
+          acao={
+            selecionada.status === 'pendente'
+              ? { label: ENCAMINHAR_LABEL[selecionada.tipo], onClick: (destinoId) => void encaminhar(selecionada.id, destinoId) }
+              : undefined
+          }
+        />
+      )}
     </div>
   )
 }

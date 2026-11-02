@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ClipboardList, Home, LayoutDashboard, LogOut, Menu, ShieldAlert, Wrench, X } from 'lucide-react'
+import { ArrowLeft, ClipboardList, Home, LayoutDashboard, LogOut, Menu, User, ShieldAlert, Wrench, X } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { iniciais } from '@/utils/format'
 
@@ -9,6 +9,7 @@ const TITULOS: Record<string, string> = {
   '/novo-chamado': 'Novo Chamado',
   '/nova-denuncia': 'Nova Denúncia',
   '/minhas-ocorrencias': 'Minhas Ocorrências',
+  '/perfil': 'Meu Perfil',
   '/admin': 'Painel de Monitoramento',
 }
 
@@ -26,6 +27,7 @@ export function AppLayout() {
     { to: '/novo-chamado', label: 'Novo Chamado', icon: Wrench },
     { to: '/nova-denuncia', label: 'Nova Denúncia', icon: ShieldAlert },
     { to: '/minhas-ocorrencias', label: 'Minhas Ocorrências', icon: ClipboardList },
+    { to: '/perfil', label: 'Meu Perfil', icon: User },
     ...(usuario.perfil === 'admin'
       ? [{ to: '/admin', label: 'Painel de Monitoramento', icon: LayoutDashboard }]
       : []),
@@ -59,12 +61,14 @@ export function AppLayout() {
         <h1 className="flex-1 truncate text-base font-semibold text-brand-900">
           {pathname.startsWith('/sos/') ? 'Emergência SOS' : (TITULOS[pathname] ?? 'Central de Reportes')}
         </h1>
-        <span
+        <Link
+          to="/perfil"
           title={usuario.nome}
-          className="grid size-8 place-items-center rounded-full bg-brand-100 text-xs font-semibold text-brand-500"
+          aria-label="Meu perfil"
+          className="grid size-8 place-items-center rounded-full bg-brand-100 text-xs font-semibold text-brand-500 hover:bg-brand-500 hover:text-white"
         >
           {iniciais(usuario.nome)}
-        </span>
+        </Link>
       </header>
 
       <main className="flex-1 px-4 py-5 md:px-8">
@@ -75,8 +79,8 @@ export function AppLayout() {
         <div className="fixed inset-0 z-30 flex" role="dialog" aria-modal="true">
           <nav className="flex w-72 max-w-[85%] flex-col gap-1 bg-white p-4 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <Link to="/" onClick={() => setMenuAberto(false)} className="text-sm font-bold text-brand-900">
-                Central de Reportes
+              <Link to="/" onClick={() => setMenuAberto(false)} aria-label="Central de Reportes">
+                <img src="/unifor-logo-horizontal.svg" alt="UNIFOR" className="h-9" />
               </Link>
               <button aria-label="Fechar menu" onClick={() => setMenuAberto(false)} className="rounded-lg p-1.5 hover:bg-brand-50">
                 <X size={20} />

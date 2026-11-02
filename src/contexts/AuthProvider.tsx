@@ -43,11 +43,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => setUnauthorizedHandler(null)
   }, [logout])
 
-  // Encerra a sessão sozinha quando o token expira.
+  // Encerra a sessão quando o token expira. O timer sozinho não basta: com a aba em segundo plano
+  // ou o computador suspenso ele atrasa, então também conferimos ao voltar à aba e a cada 30 s.
   useEffect(() => {
     if (!claims) return
-    const timer = setTimeout(logout, Math.max(0, expiraEmMs(claims)))
-    return () => clearTimeout(timer)
+    const conferir = () => {
+      if (expiraEmMs(claims) <= 0) logout()
+    }
+    const timer = setTimeout(conferir, Math.max(0, expiraEmMs(claims)))
+    const intervalo = setInterval(conferir, 30_000)
+    document.addEventListener('visibilitychange', conferir)
+    window.addEventListener('focus', conferir)
+    return () => {
+      clearTimeout(timer)
+      clearInterval(intervalo)
+      document.removeEventListener('visibilitychange', conferir)
+      window.removeEventListener('focus', conferir)
+    }
   }, [claims, logout])
 
   const value = useMemo(() => ({ usuario, expiraEm, login, logout }), [usuario, expiraEm, login, logout])

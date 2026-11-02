@@ -1,4 +1,10 @@
-export type Perfil = 'usuario' | 'admin'
+export type Perfil = 'usuario' | 'seguranca' | 'admin'
+
+export const PERFIL_LABEL: Record<Perfil, string> = {
+  usuario: 'Usuário',
+  seguranca: 'Segurança',
+  admin: 'Administrador',
+}
 
 export interface Usuario {
   id: string

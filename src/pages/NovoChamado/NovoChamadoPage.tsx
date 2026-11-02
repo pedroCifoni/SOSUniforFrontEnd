@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { LOCAIS_CAMPUS } from '@/models/catalogo'
 import type { Ocorrencia } from '@/models/ocorrencia'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
+import { paraAnexo } from '@/utils/anexo'
 
 export function NovoChamadoPage() {
   const { usuario } = useAuth()
@@ -46,7 +47,7 @@ export function NovoChamadoPage() {
             titulo: descricao.trim().slice(0, 40),
             descricao: descricao.trim(),
             local,
-            anexos: fotos.map((f) => f.name),
+            anexos: fotos.map(paraAnexo),
           },
           usuario,
         ),

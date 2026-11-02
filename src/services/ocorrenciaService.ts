@@ -17,6 +17,10 @@ export const ocorrenciaService = {
     return simulateRequest(() => banco.filter((o) => o.autorId === autorId).sort(maisRecentesPrimeiro))
   },
 
+  listarPorResponsavel(responsavelId: string): Promise<Ocorrencia[]> {
+    return simulateRequest(() => banco.filter((o) => o.responsavelId === responsavelId).sort(maisRecentesPrimeiro))
+  },
+
   buscarPorId(id: string): Promise<Ocorrencia> {
     return simulateRequest(() => {
       const alvo = banco.find((o) => o.id === id)
@@ -39,6 +43,17 @@ export const ocorrenciaService = {
       banco = [nova, ...banco]
       return nova
     })
+  },
+
+  /** Admin encaminha a ocorrência a um segurança. */
+  encaminhar(id: string, responsavelId: string): Promise<Ocorrencia> {
+    return simulateRequest(() => {
+      const alvo = banco.find((o) => o.id === id)
+      if (!alvo) throw new Error('Ocorrência não encontrada.')
+      const atualizada = { ...alvo, status: 'em_andamento' as const, responsavelId }
+      banco = banco.map((o) => (o.id === id ? atualizada : o))
+      return atualizada
+    }, 250)
   },
 
   atualizarStatus(id: string, status: StatusOcorrencia): Promise<Ocorrencia> {

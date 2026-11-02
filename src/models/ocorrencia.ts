@@ -1,3 +1,10 @@
+export interface Anexo {
+  nome: string
+  /** URL de visualização; ausente quando só o nome do arquivo é conhecido. */
+  url?: string
+  tipo?: string
+}
+
 export type TipoOcorrencia = 'sos' | 'manutencao' | 'denuncia'
 
 export type StatusOcorrencia = 'pendente' | 'em_andamento' | 'concluido'
@@ -14,7 +21,9 @@ export interface Ocorrencia {
   /** Autor real, mantido mesmo em denúncias anônimas (nunca exibido na UI). */
   autorId: string
   anonima?: boolean
-  anexos?: string[]
+  anexos?: Anexo[]
+  /** Segurança para quem o admin encaminhou a ocorrência. */
+  responsavelId?: string
   criadoEm: string
 }
 
@@ -24,13 +33,19 @@ export interface NovaOcorrencia {
   local: string
   tipo: TipoOcorrencia
   anonima?: boolean
-  anexos?: string[]
+  anexos?: Anexo[]
 }
 
 export const STATUS_LABEL: Record<StatusOcorrencia, string> = {
   pendente: 'Pendente',
   em_andamento: 'Em andamento',
   concluido: 'Concluído',
+}
+
+export const ENCAMINHAR_LABEL: Record<TipoOcorrencia, string> = {
+  sos: 'Encaminhar Patrulha',
+  manutencao: 'Encaminhar Técnico',
+  denuncia: 'Encaminhar para Análise',
 }
 
 export const TIPO_LABEL: Record<TipoOcorrencia, string> = {

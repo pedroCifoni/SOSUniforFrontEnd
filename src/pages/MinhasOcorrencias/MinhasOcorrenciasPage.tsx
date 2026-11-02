@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { BellRing, ChevronDown, ShieldAlert, Wrench, type LucideIcon } from 'lucide-react'
-import { Timeline } from '@/components/ocorrencias/Timeline'
+import { BellRing, ChevronRight, ShieldAlert, Wrench, type LucideIcon } from 'lucide-react'
+import { OcorrenciaModal } from '@/components/ocorrencias/OcorrenciaModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuth } from '@/hooks/useAuth'
 import type { Ocorrencia, TipoOcorrencia } from '@/models/ocorrencia'
@@ -24,7 +24,7 @@ export function MinhasOcorrenciasPage() {
   const { usuario } = useAuth()
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[] | null>(null)
   const [aba, setAba] = useState<Aba>('todas')
-  const [expandida, setExpandida] = useState<string | null>(null)
+  const [selecionada, setSelecionada] = useState<Ocorrencia | null>(null)
 
   useEffect(() => {
     if (!usuario) return
@@ -32,7 +32,6 @@ export function MinhasOcorrenciasPage() {
     ocorrenciaService.listarPorAutor(usuario.id).then((lista) => {
       if (!ativo) return
       setOcorrencias(lista)
-      setExpandida(lista.find((o) => o.status === 'em_andamento')?.id ?? null)
     })
     return () => {
       ativo = false
@@ -72,12 +71,11 @@ export function MinhasOcorrenciasPage() {
         <ul className="space-y-3">
           {visiveis.map((o) => {
             const Icone = ICONES[o.tipo]
-            const aberta = expandida === o.id
             return (
               <li key={o.id} className="rounded-2xl border border-line bg-white p-4 shadow-sm">
                 <button
-                  onClick={() => setExpandida(aberta ? null : o.id)}
-                  aria-expanded={aberta}
+                  onClick={() => setSelecionada(o)}
+                  aria-haspopup="dialog"
                   className="flex w-full items-start gap-3 text-left"
                 >
                   <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-brand-50 text-brand-500">
@@ -88,17 +86,14 @@ export function MinhasOcorrenciasPage() {
                     <span className="block truncate text-sm font-semibold text-brand-900">{o.titulo}</span>
                   </span>
                   <StatusBadge status={o.status} />
-                  <ChevronDown
-                    size={16}
-                    className={`mt-1 shrink-0 text-muted transition ${aberta ? 'rotate-180' : ''}`}
-                  />
+                  <ChevronRight size={16} className="mt-1 shrink-0 text-muted" />
                 </button>
-                {aberta && <Timeline ocorrencia={o} />}
               </li>
             )
           })}
         </ul>
       )}
+      {selecionada && <OcorrenciaModal ocorrencia={selecionada} onClose={() => setSelecionada(null)} />}
     </div>
   )
 }
