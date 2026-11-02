@@ -1,0 +1,84 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Build output
+dist
+dist-ssr
+build
+out
+coverage
+.nyc_output
+*.tsbuildinfo
+
+# Environment variables and secrets (auth, API keys, database URLs)
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+.secrets
+
+# Database (local files and dumps)
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.sql
+*.dump
+*.bak
+prisma/*.db
+prisma/*.db-journal
+data/
+
+# Uploads (evidence photos/videos from reports)
+uploads/
+tmp/
+temp/
+
+# Vercel
+.vercel
+
+# Caches
+.cache
+.eslintcache
+.stylelintcache
+.parcel-cache
+.turbo
+.vite
+.npm
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Claude Code local files
+.claude/settings.local.json

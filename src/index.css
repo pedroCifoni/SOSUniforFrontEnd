@@ -1,0 +1,32 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Lexend', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #dbe7ff;
+  --color-brand-500: #0057ff;
+  --color-brand-700: #003a9e;
+  --color-brand-900: #002b6b;
+
+  --color-sos-50: #fef2f2;
+  --color-sos-500: #e11d2e;
+  --color-sos-700: #b91c1c;
+
+  --color-surface: #f6f8fc;
+  --color-ink: #0f1b33;
+  --color-muted: #6b7690;
+  --color-line: #e3e8f2;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-surface font-sans text-ink antialiased;
+  }
+}
