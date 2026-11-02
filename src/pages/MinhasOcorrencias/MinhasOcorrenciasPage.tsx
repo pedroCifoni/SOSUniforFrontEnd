@@ -3,6 +3,7 @@ import { BellRing, ChevronRight, ShieldAlert, Wrench, type LucideIcon } from 'lu
 import { OcorrenciaModal } from '@/components/ocorrencias/OcorrenciaModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuth } from '@/hooks/useAuth'
+import { useNotificacoes } from '@/hooks/useNotificacoes'
 import type { Ocorrencia, TipoOcorrencia } from '@/models/ocorrencia'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
 
@@ -22,6 +23,7 @@ const ICONES: Record<TipoOcorrencia, LucideIcon> = {
 
 export function MinhasOcorrenciasPage() {
   const { usuario } = useAuth()
+  const { revisao } = useNotificacoes()
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[] | null>(null)
   const [aba, setAba] = useState<Aba>('todas')
   const [selecionada, setSelecionada] = useState<Ocorrencia | null>(null)
@@ -36,7 +38,7 @@ export function MinhasOcorrenciasPage() {
     return () => {
       ativo = false
     }
-  }, [usuario])
+  }, [usuario, revisao])
 
   const visiveis = useMemo(() => {
     const lista = ocorrencias ?? []

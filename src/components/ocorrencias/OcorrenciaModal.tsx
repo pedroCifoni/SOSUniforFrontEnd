@@ -15,9 +15,7 @@ const ICONES: Record<TipoOcorrencia, LucideIcon> = {
 interface OcorrenciaModalProps {
   ocorrencia: Ocorrencia
   onClose: () => void
-  /** Ação de atendimento (ex.: encaminhar), exibida no rodapé quando informada. */
   acao?: { label: string; onClick: (destinoId?: string) => void }
-  /** Quando informado, o usuário escolhe para quem a ação é direcionada; o id segue para `acao.onClick`. */
   destinos?: Pick<Usuario, 'id' | 'nome'>[]
 }
 

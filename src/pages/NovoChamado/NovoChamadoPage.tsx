@@ -6,6 +6,7 @@ import { Select } from '@/components/ui/Select'
 import { SuccessPanel } from '@/components/ui/SuccessPanel'
 import { Textarea } from '@/components/ui/Textarea'
 import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/useToast'
 import { LOCAIS_CAMPUS } from '@/models/catalogo'
 import type { Ocorrencia } from '@/models/ocorrencia'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
@@ -13,11 +14,11 @@ import { paraAnexo } from '@/utils/anexo'
 
 export function NovoChamadoPage() {
   const { usuario } = useAuth()
+  const toast = useToast()
   const [local, setLocal] = useState<string>(LOCAIS_CAMPUS[3])
   const [descricao, setDescricao] = useState('')
   const [fotos, setFotos] = useState<File[]>([])
   const [enviando, setEnviando] = useState(false)
-  const [erro, setErro] = useState<string | null>(null)
   const [criada, setCriada] = useState<Ocorrencia | null>(null)
 
   if (criada) {
@@ -34,10 +35,9 @@ export function NovoChamadoPage() {
     e.preventDefault()
     if (!usuario) return
     if (descricao.trim().length < 10) {
-      setErro('Descreva o problema com pelo menos 10 caracteres.')
+      toast.erro('Descreva o problema com pelo menos 10 caracteres.')
       return
     }
-    setErro(null)
     setEnviando(true)
     try {
       setCriada(
@@ -52,8 +52,9 @@ export function NovoChamadoPage() {
           usuario,
         ),
       )
+      toast.sucesso('Chamado enviado com sucesso.')
     } catch {
-      setErro('Não foi possível enviar o chamado. Tente novamente.')
+      toast.erro('Não foi possível enviar o chamado. Tente novamente.')
     } finally {
       setEnviando(false)
     }
@@ -79,11 +80,6 @@ export function NovoChamadoPage() {
         onChange={setFotos}
       />
 
-      {erro && (
-        <p role="alert" className="rounded-lg bg-sos-50 px-3 py-2 text-sm text-sos-700">
-          {erro}
-        </p>
-      )}
 
       <Button type="submit" loading={enviando} className="bg-brand-500 hover:bg-brand-700">
         Enviar Chamado

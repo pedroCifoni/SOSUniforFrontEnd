@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { OcorrenciaModal } from '@/components/ocorrencias/OcorrenciaModal'
+import { useNotificacoes } from '@/hooks/useNotificacoes'
+import { useToast } from '@/hooks/useToast'
 import { ENCAMINHAR_LABEL, TIPO_LABEL, type Ocorrencia } from '@/models/ocorrencia'
 import type { Usuario } from '@/models/usuario'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
@@ -7,6 +9,8 @@ import { usuarioService } from '@/services/usuarioService'
 import { tempoRelativo } from '@/utils/format'
 
 export function PainelAdminPage() {
+  const toast = useToast()
+  const { revisao } = useNotificacoes()
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([])
   const [selecionada, setSelecionada] = useState<Ocorrencia | null>(null)
   const [segurancas, setSegurancas] = useState<Usuario[]>([])
@@ -16,16 +20,20 @@ export function PainelAdminPage() {
   }, [])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void carregar()
     void usuarioService.listarSegurancas().then(setSegurancas)
-  }, [carregar])
+  }, [carregar, revisao])
 
   async function encaminhar(id: string, destinoId?: string) {
     if (!destinoId) return
-    await ocorrenciaService.encaminhar(id, destinoId)
-    setSelecionada(null)
-    void carregar()
+    try {
+      await ocorrenciaService.encaminhar(id, destinoId)
+      toast.sucesso('Ocorrência encaminhada.')
+      setSelecionada(null)
+      void carregar()
+    } catch {
+      toast.erro('Não foi possível encaminhar a ocorrência.')
+    }
   }
 
   const pendentes = ocorrencias.filter((o) => o.status === 'pendente')

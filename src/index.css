@@ -19,6 +19,17 @@
   --color-line: #e3e8f2;
 }
 
+@keyframes toast-entrada {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+}
+
+.toast-entrada {
+  animation: toast-entrada 0.2s ease-out;
+}
+
 @layer base {
   html,
   body,

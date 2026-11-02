@@ -2,12 +2,16 @@ import { useCallback, useEffect, useState } from 'react'
 import { OcorrenciaModal } from '@/components/ocorrencias/OcorrenciaModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuth } from '@/hooks/useAuth'
+import { useNotificacoes } from '@/hooks/useNotificacoes'
+import { useToast } from '@/hooks/useToast'
 import { TIPO_LABEL, type Ocorrencia } from '@/models/ocorrencia'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
 import { tempoRelativo } from '@/utils/format'
 
 export function SegurancaHomePage() {
   const { usuario } = useAuth()
+  const toast = useToast()
+  const { revisao } = useNotificacoes()
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[] | null>(null)
   const [selecionada, setSelecionada] = useState<Ocorrencia | null>(null)
 
@@ -16,14 +20,18 @@ export function SegurancaHomePage() {
   }, [usuario])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void carregar()
-  }, [carregar])
+  }, [carregar, revisao])
 
   async function concluir(id: string) {
-    await ocorrenciaService.atualizarStatus(id, 'concluido')
-    setSelecionada(null)
-    void carregar()
+    try {
+      await ocorrenciaService.atualizarStatus(id, 'concluido', usuario?.id)
+      toast.sucesso('Atendimento concluído.')
+      setSelecionada(null)
+      void carregar()
+    } catch {
+      toast.erro('Não foi possível concluir o atendimento.')
+    }
   }
 
   const lista = ocorrencias ?? []

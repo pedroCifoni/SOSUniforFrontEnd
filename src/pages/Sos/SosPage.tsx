@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { BellRing, MapPin, Navigation, Phone, ShieldCheck } from 'lucide-react'
+import { useToast } from '@/hooks/useToast'
 import type { Ocorrencia } from '@/models/ocorrencia'
 import type { Seguranca } from '@/models/seguranca'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
@@ -10,6 +11,7 @@ import { iniciais } from '@/utils/format'
 export function SosPage() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
+  const toast = useToast()
   const [ocorrencia, setOcorrencia] = useState<Ocorrencia | null>(null)
   const [segurancas, setSegurancas] = useState<Seguranca[]>([])
   const [confirmando, setConfirmando] = useState(false)
@@ -19,14 +21,17 @@ export function SosPage() {
     ocorrenciaService
       .buscarPorId(id)
       .then((o) => ativo && setOcorrencia(o))
-      .catch(() => ativo && navigate('/', { replace: true }))
+      .catch(() => {
+        if (!ativo) return
+        toast.erro('Alerta SOS não encontrado.')
+        navigate('/', { replace: true })
+      })
     segurancaService.listarNotificados().then((s) => ativo && setSegurancas(s))
     return () => {
       ativo = false
     }
-  }, [id, navigate])
+  }, [id, navigate, toast])
 
-  // Simula os seguranças confirmando deslocamento, um após o outro.
   useEffect(() => {
     if (segurancas.length === 0) return
     const timers = segurancas.map((s, i) =>
@@ -36,13 +41,17 @@ export function SosPage() {
       ),
     )
     return () => timers.forEach(clearTimeout)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [segurancas.length])
 
   async function cancelar() {
     if (!ocorrencia) return
-    await ocorrenciaService.atualizarStatus(ocorrencia.id, 'concluido')
-    navigate('/', { replace: true })
+    try {
+      await ocorrenciaService.atualizarStatus(ocorrencia.id, 'concluido', ocorrencia.autorId)
+      toast.info('SOS cancelado.')
+      navigate('/', { replace: true })
+    } catch {
+      toast.erro('Não foi possível cancelar o SOS.')
+    }
   }
 
   if (!ocorrencia) {

@@ -1,7 +1,6 @@
 import { API_URL } from './config'
 import { tokenStorage } from './tokenStorage'
 
-// --- Modo mock: simula latência de rede sobre dados locais. ---
 export function simulateRequest<T>(produce: () => T, ms = 400): Promise<T> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
@@ -14,10 +13,8 @@ export function simulateRequest<T>(produce: () => T, ms = 400): Promise<T> {
   })
 }
 
-// --- Modo real: cliente HTTP que anexa o JWT e trata sessão expirada. ---
 let aoNaoAutorizado: (() => void) | null = null
 
-/** O AuthProvider registra aqui o que fazer quando o backend responde 401 com token enviado. */
 export function setUnauthorizedHandler(handler: (() => void) | null) {
   aoNaoAutorizado = handler
 }

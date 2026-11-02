@@ -5,6 +5,8 @@ import { OcorrenciaModal } from '@/components/ocorrencias/OcorrenciaModal'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { useAuth } from '@/hooks/useAuth'
 import { useHoldPress } from '@/hooks/useHoldPress'
+import { useNotificacoes } from '@/hooks/useNotificacoes'
+import { useToast } from '@/hooks/useToast'
 import { ENCAMINHAR_LABEL, type Ocorrencia } from '@/models/ocorrencia'
 import type { Usuario } from '@/models/usuario'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
@@ -18,6 +20,8 @@ const atalhos = [
 
 export function HomePage() {
   const { usuario } = useAuth()
+  const toast = useToast()
+  const { revisao } = useNotificacoes()
   const [ocorrencias, setOcorrencias] = useState<Ocorrencia[]>([])
   const [selecionada, setSelecionada] = useState<Ocorrencia | null>(null)
   const [segurancas, setSegurancas] = useState<Usuario[]>([])
@@ -25,7 +29,6 @@ export function HomePage() {
 
   const atendimento = usuario?.perfil === 'admin'
 
-  // Admin vê a mesma fila do painel (pendentes de todos); usuário vê só as próprias.
   const carregar = useCallback(async () => {
     if (!usuario) return
     setOcorrencias(
@@ -35,29 +38,37 @@ export function HomePage() {
 
   async function encaminhar(id: string, destinoId?: string) {
     if (!destinoId) return
-    await ocorrenciaService.encaminhar(id, destinoId)
-    setSelecionada(null)
-    void carregar()
+    try {
+      await ocorrenciaService.encaminhar(id, destinoId)
+      toast.sucesso('Ocorrência encaminhada.')
+      setSelecionada(null)
+      void carregar()
+    } catch {
+      toast.erro('Não foi possível encaminhar a ocorrência.')
+    }
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     void carregar()
-  }, [carregar])
+  }, [carregar, revisao])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (atendimento) void usuarioService.listarSegurancas().then(setSegurancas)
   }, [atendimento])
 
   const acionarSos = useCallback(async () => {
     if (!usuario) return
-    const sos = await ocorrenciaService.criar(
-      { titulo: 'Acionamento de Emergência', local: 'Bloco D · Próx. Entrada principal', tipo: 'sos' },
-      usuario,
-    )
-    navigate(`/sos/${sos.id}`)
-  }, [usuario, navigate])
+    try {
+      const sos = await ocorrenciaService.criar(
+        { titulo: 'Acionamento de Emergência', local: 'Bloco D · Próx. Entrada principal', tipo: 'sos' },
+        usuario,
+      )
+      toast.sucesso('SOS acionado. A segurança foi alertada.')
+      navigate(`/sos/${sos.id}`)
+    } catch {
+      toast.erro('Não foi possível acionar o SOS. Ligue para a Segurança.')
+    }
+  }, [usuario, navigate, toast])
 
   const { progresso, iniciar, cancelar } = useHoldPress(acionarSos, 2000)
 

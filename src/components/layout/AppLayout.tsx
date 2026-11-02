@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ClipboardList, Home, LayoutDashboard, LogOut, Menu, User, ShieldAlert, Wrench, X } from 'lucide-react'
+import { ArrowLeft, ClipboardList, Home, LayoutDashboard, LogOut, Menu, User, Users, ShieldAlert, Wrench, X } from 'lucide-react'
+import { NotificationBell } from '@/components/layout/NotificationBell'
 import { useAuth } from '@/hooks/useAuth'
 import { iniciais } from '@/utils/format'
 
@@ -11,6 +12,7 @@ const TITULOS: Record<string, string> = {
   '/minhas-ocorrencias': 'Minhas Ocorrências',
   '/perfil': 'Meu Perfil',
   '/admin': 'Painel de Monitoramento',
+  '/admin/usuarios': 'Usuários',
 }
 
 export function AppLayout() {
@@ -29,7 +31,10 @@ export function AppLayout() {
     { to: '/minhas-ocorrencias', label: 'Minhas Ocorrências', icon: ClipboardList },
     { to: '/perfil', label: 'Meu Perfil', icon: User },
     ...(usuario.perfil === 'admin'
-      ? [{ to: '/admin', label: 'Painel de Monitoramento', icon: LayoutDashboard }]
+      ? [
+          { to: '/admin', label: 'Painel de Monitoramento', icon: LayoutDashboard },
+          { to: '/admin/usuarios', label: 'Usuários', icon: Users },
+        ]
       : []),
   ]
 
@@ -61,6 +66,7 @@ export function AppLayout() {
         <h1 className="flex-1 truncate text-base font-semibold text-brand-900">
           {pathname.startsWith('/sos/') ? 'Emergência SOS' : (TITULOS[pathname] ?? 'Central de Reportes')}
         </h1>
+        <NotificationBell />
         <Link
           to="/perfil"
           title={usuario.nome}

@@ -4,11 +4,14 @@ import type { Usuario } from '@/models/usuario'
 
 export const SENHA_MOCK = '123456'
 
-export const usuariosMock: Usuario[] = [
+export interface UsuarioMock extends Usuario {
+  senha?: string
+}
+
+export const usuariosMock: UsuarioMock[] = [
   { id: 'u1', nome: 'Eduardo Costa', email: 'eduardo.costa@unifor.br', perfil: 'usuario' },
   { id: 'u2', nome: 'Administrador', email: 'admin@unifor.br', perfil: 'admin' },
   { id: 'u3', nome: 'Equipe Segurança', email: 'seguranca@unifor.br', perfil: 'seguranca' },
-  { id: 'u4', nome: 'Carlos Mendes', email: 'carlos.mendes@unifor.br', perfil: 'seguranca' },
 ]
 
 export const segurancasMock: Seguranca[] = [

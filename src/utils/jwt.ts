@@ -21,10 +21,6 @@ function base64UrlDecode(valor: string): string {
   return new TextDecoder().decode(Uint8Array.from(binario, (c) => c.charCodeAt(0)))
 }
 
-/**
- * Lê as claims do payload. NÃO valida a assinatura: isso só o backend pode fazer.
- * No front o token serve para exibir dados do usuário e saber quando expira.
- */
 export function decodeJwt(token: string): JwtClaims | null {
   try {
     const partes = token.split('.')
@@ -37,11 +33,9 @@ export function decodeJwt(token: string): JwtClaims | null {
     return null
   }
 }
-
 export function expiraEmMs(claims: JwtClaims): number {
   return claims.exp * 1000 - Date.now()
 }
-
 export function claimsParaUsuario(claims: JwtClaims): Usuario {
   return { id: claims.sub, nome: claims.name, email: claims.email, perfil: claims.role }
 }

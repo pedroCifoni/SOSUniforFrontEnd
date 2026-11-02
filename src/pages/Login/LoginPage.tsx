@@ -4,27 +4,27 @@ import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/useToast'
 
 export function LoginPage() {
   const { usuario, login } = useAuth()
+  const toast = useToast()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [mostrarSenha, setMostrarSenha] = useState(false)
-  const [erro, setErro] = useState<string | null>(null)
   const [carregando, setCarregando] = useState(false)
 
   if (usuario) return <Navigate to={usuario.perfil === 'admin' ? '/admin' : '/'} replace />
 
   async function enviar(e: FormEvent) {
     e.preventDefault()
-    setErro(null)
     setCarregando(true)
     try {
       const logado = await login({ email, senha })
       navigate(logado.perfil === 'admin' ? '/admin' : '/', { replace: true })
     } catch (err) {
-      setErro(err instanceof Error ? err.message : 'Não foi possível entrar.')
+      toast.erro(err instanceof Error ? err.message : 'Não foi possível entrar.')
     } finally {
       setCarregando(false)
     }
@@ -71,11 +71,6 @@ export function LoginPage() {
             }
           />
 
-          {erro && (
-            <p role="alert" className="rounded-lg bg-sos-50 px-3 py-2 text-sm text-sos-700">
-              {erro}
-            </p>
-          )}
 
           <Button type="submit" loading={carregando} disabled={!email || !senha}>
             Entrar

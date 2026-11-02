@@ -1,6 +1,5 @@
 export interface Anexo {
   nome: string
-  /** URL de visualização; ausente quando só o nome do arquivo é conhecido. */
   url?: string
   tipo?: string
 }
@@ -18,11 +17,9 @@ export interface Ocorrencia {
   tipo: TipoOcorrencia
   status: StatusOcorrencia
   solicitante: string
-  /** Autor real, mantido mesmo em denúncias anônimas (nunca exibido na UI). */
   autorId: string
   anonima?: boolean
   anexos?: Anexo[]
-  /** Segurança para quem o admin encaminhou a ocorrência. */
   responsavelId?: string
   criadoEm: string
 }

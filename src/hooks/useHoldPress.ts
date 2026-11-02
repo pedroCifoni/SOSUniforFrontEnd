@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-// Dispara onComplete após o usuário segurar o botão por `ms`. `progresso` vai de 0 a 1.
 export function useHoldPress(onComplete: () => void, ms = 2000) {
   const [progresso, setProgresso] = useState(0)
   const raf = useRef<number | null>(null)

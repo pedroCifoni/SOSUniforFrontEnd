@@ -13,12 +13,18 @@ export interface Usuario {
   perfil: Perfil
 }
 
+export interface DadosUsuario {
+  nome: string
+  email: string
+  perfil: Perfil
+  senha?: string
+}
+
 export interface Credenciais {
   email: string
   senha: string
 }
 
-/** Resposta do login: o usuário e o perfil vêm dentro das claims do JWT. */
 export interface LoginResponse {
   token: string
 }

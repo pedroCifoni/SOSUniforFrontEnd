@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { setUnauthorizedHandler } from '@/api/client'
 import { tokenStorage } from '@/api/tokenStorage'
 import type { Credenciais } from '@/models/usuario'
+import { useToast } from '@/hooks/useToast'
 import { authService } from '@/services/authService'
 import { claimsParaUsuario, decodeJwt, expiraEmMs } from '@/utils/jwt'
 import { AuthContext } from './authContext'
 
-/** Token guardado só vale se for legível e ainda não tiver expirado. */
 function carregarTokenValido(): string | null {
   const token = tokenStorage.get()
   const claims = token ? decodeJwt(token) : null
@@ -17,8 +17,8 @@ function carregarTokenValido(): string | null {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(carregarTokenValido)
+  const toast = useToast()
 
-  // A sessão inteira (usuário, perfil, expiração) é derivada do token: fonte única de verdade.
   const claims = useMemo(() => (token ? decodeJwt(token) : null), [token])
   const usuario = useMemo(() => (claims ? claimsParaUsuario(claims) : null), [claims])
   const expiraEm = claims ? claims.exp * 1000 : null
@@ -37,18 +37,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return claimsParaUsuario(novasClaims)
   }, [])
 
-  // Backend respondeu 401 com token enviado: sessão inválida, volta ao login.
-  useEffect(() => {
-    setUnauthorizedHandler(logout)
-    return () => setUnauthorizedHandler(null)
-  }, [logout])
+  const sessaoExpirada = useCallback(() => {
+    logout()
+    toast.info('Sua sessão expirou. Entre novamente.')
+  }, [logout, toast])
 
-  // Encerra a sessão quando o token expira. O timer sozinho não basta: com a aba em segundo plano
-  // ou o computador suspenso ele atrasa, então também conferimos ao voltar à aba e a cada 30 s.
+  useEffect(() => {
+    setUnauthorizedHandler(sessaoExpirada)
+    return () => setUnauthorizedHandler(null)
+  }, [sessaoExpirada])
+
   useEffect(() => {
     if (!claims) return
     const conferir = () => {
-      if (expiraEmMs(claims) <= 0) logout()
+      if (expiraEmMs(claims) <= 0) sessaoExpirada()
     }
     const timer = setTimeout(conferir, Math.max(0, expiraEmMs(claims)))
     const intervalo = setInterval(conferir, 30_000)
@@ -60,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('visibilitychange', conferir)
       window.removeEventListener('focus', conferir)
     }
-  }, [claims, logout])
+  }, [claims, sessaoExpirada])
 
   const value = useMemo(() => ({ usuario, expiraEm, login, logout }), [usuario, expiraEm, login, logout])
 

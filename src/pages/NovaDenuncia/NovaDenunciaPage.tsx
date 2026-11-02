@@ -6,6 +6,7 @@ import { Select } from '@/components/ui/Select'
 import { SuccessPanel } from '@/components/ui/SuccessPanel'
 import { Textarea } from '@/components/ui/Textarea'
 import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/useToast'
 import { TIPOS_DENUNCIA } from '@/models/catalogo'
 import type { Ocorrencia } from '@/models/ocorrencia'
 import { ocorrenciaService } from '@/services/ocorrenciaService'
@@ -13,12 +14,12 @@ import { paraAnexo } from '@/utils/anexo'
 
 export function NovaDenunciaPage() {
   const { usuario } = useAuth()
+  const toast = useToast()
   const [anonima, setAnonima] = useState(true)
   const [tipo, setTipo] = useState<string>(TIPOS_DENUNCIA[0])
   const [descricao, setDescricao] = useState('')
   const [evidencias, setEvidencias] = useState<File[]>([])
   const [enviando, setEnviando] = useState(false)
-  const [erro, setErro] = useState<string | null>(null)
   const [criada, setCriada] = useState<Ocorrencia | null>(null)
 
   if (criada) {
@@ -39,10 +40,9 @@ export function NovaDenunciaPage() {
     e.preventDefault()
     if (!usuario) return
     if (descricao.trim().length < 10) {
-      setErro('Descreva os fatos com pelo menos 10 caracteres.')
+      toast.erro('Descreva os fatos com pelo menos 10 caracteres.')
       return
     }
-    setErro(null)
     setEnviando(true)
     try {
       setCriada(
@@ -58,8 +58,9 @@ export function NovaDenunciaPage() {
           usuario,
         ),
       )
+      toast.sucesso('Denúncia registrada com sucesso.')
     } catch {
-      setErro('Não foi possível registrar a denúncia. Tente novamente.')
+      toast.erro('Não foi possível registrar a denúncia. Tente novamente.')
     } finally {
       setEnviando(false)
     }
@@ -105,11 +106,6 @@ export function NovaDenunciaPage() {
         onChange={setEvidencias}
       />
 
-      {erro && (
-        <p role="alert" className="rounded-lg bg-sos-50 px-3 py-2 text-sm text-sos-700">
-          {erro}
-        </p>
-      )}
 
       <Button type="submit" loading={enviando}>
         Registrar Denúncia

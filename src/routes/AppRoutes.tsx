@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { PainelAdminPage } from '@/pages/Admin/PainelAdminPage'
+import { UsuariosPage } from '@/pages/Admin/UsuariosPage'
 import { HomePage } from '@/pages/Home/HomePage'
 import { LoginPage } from '@/pages/Login/LoginPage'
 import { MinhasOcorrenciasPage } from '@/pages/MinhasOcorrencias/MinhasOcorrenciasPage'
@@ -33,6 +34,7 @@ export function AppRoutes() {
 
           <Route element={<ProtectedRoute perfis={['admin']} />}>
             <Route path="admin" element={<PainelAdminPage />} />
+            <Route path="admin/usuarios" element={<UsuariosPage />} />
           </Route>
         </Route>
       </Route>

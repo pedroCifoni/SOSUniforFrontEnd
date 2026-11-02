@@ -9,7 +9,6 @@ const SETOR: Record<TipoOcorrencia, string> = {
 
 type Etapa = { titulo: string; detalhe: string; estado: 'feito' | 'atual' | 'pendente' }
 
-// Deriva as etapas a partir do status até o backend expor o histórico real.
 function etapas(o: Ocorrencia): Etapa[] {
   const encaminhado = o.status !== 'pendente'
   const concluido = o.status === 'concluido'
