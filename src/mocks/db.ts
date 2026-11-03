@@ -9,7 +9,7 @@ export interface UsuarioMock extends Usuario {
 }
 
 export const usuariosMock: UsuarioMock[] = [
-  { id: 'u1', nome: 'Eduardo Costa', email: 'eduardo.costa@unifor.br', perfil: 'usuario' },
+  { id: 'u1', nome: 'Pedro Cifoni', email: 'pedro.cifoni@unifor.br', perfil: 'usuario' },
   { id: 'u2', nome: 'Administrador', email: 'admin@unifor.br', perfil: 'admin' },
   { id: 'u3', nome: 'Equipe Segurança', email: 'seguranca@unifor.br', perfil: 'seguranca' },
 ]
